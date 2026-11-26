@@ -1,0 +1,50 @@
+Language: Cpp
+BasedOnStyle: Google
+
+ColumnLimit: 120
+
+UseTab: Never
+TabWidth: 4
+IndentWidth: 4
+ContinuationIndentWidth: 4
+ConstructorInitializerIndentWidth: 4
+
+AccessModifierOffset: -4
+IndentAccessModifiers: false
+NamespaceIndentation: None
+
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeCpp11BracedList: false
+
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
+
+BreakBeforeBraces: Attach
+
+PointerAlignment: Left
+DerivePointerAlignment: true
+
+SortIncludes: true
+IncludeBlocks: Regroup
+IncludeIsMainRegex: '(-_test)?$'
+IncludeCategories:
+  # C 语言系统文件：<stdio.h>、<unistd.h> 等平铺小写 .h
+  - Regex:           '^<[a-z_]+\.h>$'
+    Priority:        1
+  # C++ 标准库：<vector>、<string>、<cstdio> 等（无路径、无 .h）
+  - Regex:           '^<[a-z_]+>$'
+    Priority:        2
+  # 其它库的头文件：<glog/logging.h>、<cuda_runtime.h> 等
+  - Regex:           '^<.*>$'
+    Priority:        3
+  # 本项目的头文件（含引号或带路径的相对引用）
+  - Regex:           '.*'
+    Priority:        4
+
+SortUsingDeclarations: true
+ReflowComments: true
+FixNamespaceComments: true

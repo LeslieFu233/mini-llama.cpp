@@ -1,0 +1,52 @@
+# ═══════════ .clangd —— C/C++ 与 CUDA 共用 (clangd 22.x 实测通过) ═══════════
+# 文档: https://clangd.llvm.org/config
+# · 片段用 --- 分隔; If 必须在片段顶层; PathMatch 是整串匹配的正则
+
+# ---------- 1) 通用 (C/C++ 与 CUDA 都生效) ----------
+Diagnostics:
+  UnusedIncludes: None     # include-cleaner 噪音大; 想要严格检查改 Strict
+
+Index:
+  Background: Build        # 后台索引整个项目 (跨文件跳转、查找引用)
+
+CompileFlags:
+  # 有 compile_commands.json 时 -I/-std 自动带上; 没有编译数据库时才手动加:
+  # Add:
+  #   - -Iinclude
+  #   - -Ithird_party
+  #   - -std=c++17          # 会覆盖编译数据库里的 -std, 慎用
+---
+# ---------- 2) CUDA 文件 (*.cu / *.cuh) ----------
+If:
+  PathMatch: .*\.cuh?
+CompileFlags:
+  Add:
+    - -x
+    - cuda                                # .cuh 不会被自动识别为 CUDA, 需显式指定
+    - --cuda-path=/usr/local/cuda          # <<< 改成实际 CUDA toolkit 路径
+    - --cuda-gpu-arch=sm_87                # <<< 改成实际 GPU 架构
+    - -Xclang=-fcuda-allow-variadic-functions
+    - -ferror-limit=0
+  Remove:
+    # 剥掉 nvcc 专有参数, 否则 clangd 会报 unknown argument (已实测)
+    - -ccbin*
+    - --compiler-options*
+    - -Xcompiler*
+    - -Xcudafe*
+    - -Xfatbin*
+    - -Xptxas*
+    - --diag_suppress*
+    - --generate-code*
+    - -gencode*
+    - -gpu*
+    - --gpu*
+    - -rdc*
+    - --relocatable-device-code*
+    - --expt-*
+    - --use_fast_math
+    - -lineinfo
+    - -forward-unknown-to-host-compiler
+    - -stdpar
+    - --options-file*                      # CMake 3.29.5+ 的 rsp 应答文件
+# Completion:
+#   HeaderInsertion: Never                 # IWYU 自动补 #include 在 CUDA 里易插错位

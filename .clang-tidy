@@ -1,0 +1,136 @@
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-macro-parentheses,
+  cert-*,
+  -cert-dcl21-cpp,
+  -cert-err58-cpp,
+  cppcoreguidelines-init-variables,
+  cppcoreguidelines-avoid-non-const-global-variables,
+  cppcoreguidelines-non-private-member-variables-in-classes,
+  cppcoreguidelines-special-member-functions,
+  cppcoreguidelines-virtual-class-destructor,
+  google-build-using-namespace,
+  google-explicit-constructor,
+  google-readability-casting,
+  google-readability-todo,
+  misc-definitions-in-headers,
+  misc-unconventional-assign-operator,
+  misc-unused-using-decls,
+  modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-equals-default,
+  modernize-use-equals-delete,
+  performance-for-range-copy,
+  performance-unnecessary-copy-initialization,
+  performance-unnecessary-value-param,
+  readability-braces-around-statements,
+  readability-identifier-naming,
+  readability-inconsistent-declaration-parameter-name,
+  readability-misleading-indentation,
+  readability-redundant-member-init,
+  readability-redundant-smartptr-get,
+  readability-static-accessed-through-instance
+
+HeaderFilterRegex: '.*'
+FormatStyle: file
+WarningsAsErrors: ''
+
+CheckOptions:
+  # ------------------------------------------------------------------
+  # 类（规范：类命名驼峰首字母大写，无下划线）
+  #   1. 单参数构造函数 explicit            → google-explicit-constructor
+  #   2. 明确可拷贝/仅移动/不可拷贝不可移动 → cppcoreguidelines-special-member-functions
+  #      （=delete 显式禁用 → modernize-use-equals-delete）
+  #   3. struct 仅用于存数据的被动对象 —— 无对应检查，请评审把关
+  #   4. 组合优于继承 —— 无对应检查，请评审把关
+  #   5. 继承一律 public，不希望被继承用 final —— 部分由
+  #      cppcoreguidelines-virtual-class-destructor / modernize-use-override 覆盖
+  #   6. public/protected/private 由 .clang-format 顶格排版；
+  #      private 成员变量与成员函数分开 —— 请评审把关
+  # ------------------------------------------------------------------
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.UnionCase
+    value: CamelCase
+  # 类型别名（typedef / using）同类型命名
+  - key: readability-identifier-naming.TypeAliasCase
+    value: CamelCase
+  - key: readability-identifier-naming.TypedefCase
+    value: CamelCase
+  - key: readability-identifier-naming.TemplateParameterCase
+    value: CamelCase
+
+  # ------------------------------------------------------------------
+  # 命名规范
+  #   2. 变量：小写 + 下划线；类成员变量下划线结尾，结构体成员变量不用
+  #      注意：clang-tidy 无法区分 class 成员与 struct 成员，二者均按
+  #      MemberCase/MemberSuffix 校验。若以 struct 为主，可删掉 MemberSuffix。
+  #   3. 常量：k 开头驼峰（首字母小写）→ camelBack
+  #      注意：不要配置 *Prefix: k，那会让检查先剥离名字里的 'k' 再比较，
+  #      把 kMaxSize 误判为错误；k 本身就是驼峰命名的一部分。
+  #   4. 函数：驼峰首字母小写 → camelBack
+  #   5. 枚举：枚举名按类命名，枚举值按常量命名
+  #   6. 宏：全大写 + 下划线
+  # ------------------------------------------------------------------
+  # 变量
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.GlobalVariableCase
+    value: lower_case
+  - key: readability-identifier-naming.LocalVariableCase
+    value: lower_case
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case
+  - key: readability-identifier-naming.MemberCase
+    value: lower_case
+  - key: readability-identifier-naming.MemberSuffix
+    value: '_'
+  # 常量（k 开头驼峰，如 kMaxSize）
+  - key: readability-identifier-naming.ConstantCase
+    value: camelBack
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: camelBack
+  - key: readability-identifier-naming.ClassConstantCase
+    value: camelBack
+  - key: readability-identifier-naming.StaticConstantCase
+    value: camelBack
+  - key: readability-identifier-naming.MemberConstantCase
+    value: camelBack
+  - key: readability-identifier-naming.ConstexprVariableCase
+    value: camelBack
+  # 函数 / 方法（驼峰首字母小写）
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.MethodCase
+    value: camelBack
+  # 枚举、枚举类：枚举名同“类”命名，枚举值同“常量”命名
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantCase
+    value: camelBack
+  # 命名空间、标签：小写下划线
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case
+  - key: readability-identifier-naming.LabelCase
+    value: lower_case
+  # 宏：全大写，下划线分隔（函数宏同样适用）
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
+
+  # ------------------------------------------------------------------
+  # 其它检查项参数
+  # ------------------------------------------------------------------
+  # 短的 if/else 也要加大括号（readability-braces-around-statements）
+  # ShortStatementLines=0：即使单行语句也必须加大括号（=1 会放过单行 if/for/while）
+  - key: readability-braces-around-statements.ShortStatementLines
+    value: '0'
+  # struct 式类（全部成员公有）不报 non-private-member-variables
+  - key: cppcoreguidelines-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value: 'true'
+  # 变量必须在声明时初始化（规范：声明时初始化）
+  - key: cppcoreguidelines-init-variables.IgnoreArrays
+    value: 'false'
